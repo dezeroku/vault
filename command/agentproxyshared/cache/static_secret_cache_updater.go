@@ -24,7 +24,6 @@ import (
 	"github.com/hashicorp/vault/command/agentproxyshared/cache/cachememdb"
 	"github.com/hashicorp/vault/command/agentproxyshared/sink"
 	"github.com/hashicorp/vault/helper/useragent"
-	"github.com/hashicorp/vault/sdk/logical"
 	"golang.org/x/exp/maps"
 	"nhooyr.io/websocket"
 )
@@ -674,7 +673,7 @@ tokenLoop:
 			if err != nil {
 				updater.logger.Error("error occurred during streaming static secret cache update events", "err", err)
 				shouldBackoff = true
-				if strings.Contains(err.Error(), logical.ErrInvalidToken.Error()) && !authRenewalInProgress.Load() {
+				if !authRenewalInProgress.Load() {
 					// Drain the channel in case there is an error that has already been sent but not received
 					select {
 					case <-invalidTokenErrCh:

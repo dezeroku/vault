@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 	"sync/atomic"
 	"time"
 
@@ -64,13 +63,12 @@ func ProxyHandler(ctx context.Context, logger hclog.Logger, proxier Proxier, inm
 		if err != nil {
 			// If this is an api.Response error, don't wrap the response.
 			if resp != nil && resp.Response.Error() != nil {
-				responseErrMessage := resp.Response.Error()
 				copyHeader(w.Header(), resp.Response.Header)
 				w.WriteHeader(resp.Response.StatusCode)
 				io.Copy(w, resp.Response.Body)
 				metrics.IncrCounter([]string{"agent", "proxy", "client_error"}, 1)
 				// Re-trigger auto auth if the token is the same as the auto auth token
-				if resp.Response.StatusCode == 403 && strings.Contains(responseErrMessage.Error(), logical.ErrInvalidToken.Error()) &&
+				if resp.Response.StatusCode == 403 &&
 					autoAuthToken == token && !authInProgress.Load() {
 					// Drain the error channel first
 					logger.Info("proxy received an invalid token error")

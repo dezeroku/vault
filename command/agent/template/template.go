@@ -14,7 +14,6 @@ import (
 	"fmt"
 	"io"
 	"math"
-	"strings"
 	sync "sync/atomic"
 	"time"
 
@@ -28,7 +27,6 @@ import (
 	"github.com/hashicorp/vault/sdk/helper/backoff"
 	"github.com/hashicorp/vault/sdk/helper/consts"
 	"github.com/hashicorp/vault/sdk/helper/pointerutil"
-	"github.com/hashicorp/vault/sdk/logical"
 	"go.uber.org/atomic"
 )
 
@@ -253,7 +251,7 @@ func (ts *Server) Run(ctx context.Context, incoming chan string, templates []*ct
 				ts.logger.Error("template server: could not extract error response")
 				continue
 			}
-			if responseError.StatusCode == 403 && strings.Contains(responseError.Error(), logical.ErrInvalidToken.Error()) && !tokenRenewalInProgress.Load() {
+			if responseError.StatusCode == 403 && !tokenRenewalInProgress.Load() {
 				ts.logger.Info("template server: received invalid token error")
 
 				// Drain the error channel and incoming channel before sending a new error
