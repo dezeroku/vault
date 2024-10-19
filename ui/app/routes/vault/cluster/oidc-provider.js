@@ -148,7 +148,7 @@ export default class VaultClusterOidcProviderRoute extends Route {
     } catch (errorRes) {
       const resp = await errorRes.json();
       const code = resp.error;
-      if (code === 'max_age_violation' || resp?.errors?.includes('permission denied')) {
+      if (code === 'max_age_violation' || resp?.errors?.some((element) => element.match(/.*permission denied.*/))) {
         this._redirectToAuth({ ...routeParams, qp, logout: true });
       } else if (code === 'invalid_redirect_uri') {
         return {
